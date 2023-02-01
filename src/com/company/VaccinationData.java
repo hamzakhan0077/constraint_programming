@@ -38,7 +38,7 @@ public class VaccinationData {
 	    for (int i=0;i<c;i++){
 	    	for (int j = 0; j<d; j++) {
 	    		temp = scanner.nextInt();
-	    		System.out.println(temp);
+//	    		System.out.println(temp);
 	    		minReq[i][j] = temp;
 	    	}
 	    }

@@ -4,6 +4,11 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+// mininizing the total number of vaccine issued
+// create a var
+// write a constraint
+// that makes sure that  the total number of vaccines that are issued
+
 /*
  * A general version of the Magic Square problem as a matrix
  *   - now we allow the square to be any size
