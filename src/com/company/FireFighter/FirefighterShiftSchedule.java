@@ -28,7 +28,9 @@ public class FirefighterShiftSchedule {
         int[] shiftMinimum = reader.getShiftMinimum(); //returns an array with the minimum number of firefighters required for each shift
         int[][] qualsRequired = reader.getQualsRequired();//returns a 2d matrix (num quals x num shifts), where at least matrix[i][j] firefighters with qualification i must be scheduled in shift j
         int[][] qualfiedFirefighter = reader.getQualifiedFirefighters(); //returns a 2d matrix (num quals x num fighters), where matrix[i][j] means qualification i is held by firefighter j
-        System.out.println("\n"+  Arrays.toString(shiftMinimum));
+        System.out.println("\n"+ "Minimum number of firefighters required  : "+ Arrays.toString(shiftMinimum)+"\n"+
+                "Qualifications Required  : "+ Arrays.deepToString(qualsRequired)+"\n"+
+                "Qualified Firefighter   : "+ Arrays.deepToString(qualfiedFirefighter)+"\n");
 //
 //        System.out.println("Total Number of Shifts : "+ numShifts + "\n" +
 //                "Total Number of Firefighters "+ numFirefighter + "\n" +
@@ -43,33 +45,42 @@ public class FirefighterShiftSchedule {
 //                );
         System.out.println(minWork);
 
-
-        IntVar[][] firefighterShiftGrid = model.intVarMatrix("Grid",  numShifts,  numFirefighter,  0,maxConsecutive );
-        // Row - Firefighter
-        // Col - Shifts
-
-
-        // For each row
+        IntVar[][] firefighterShiftGrid = model.intVarMatrix("Grid",  numShifts,  numFirefighter,  0,1 );
+        // rows Firefighters
+        // Cols Shifts
+        IntVar [] qualfiedWorkingff = model.intVarArray(numFirefighter,0,1); //
         for( int j = 0; j < numShifts; j++){
 
 
             // Sum of each column of the Grid Must be equal to the minimum number in the min Firefighters required
             model.sum(ArrayUtils.getColumn(firefighterShiftGrid,j),">=", shiftMinimum[j]).post();
 
-        }
-        // we want to run this for each row - i.e. For each firefighter
-        for( int j = 0; j < numShifts; j++){
-        // minimum number of times that firefighter must work
-        // is  Sum or rows (Firefightrs total shift)  >=  minimum shift
-        model.sum(firefighterShiftGrid[],">=", minWork).post();
+            // Qualified firefighters array [F0, F1]
+            // Shit N - [1, 0] // firefighter 0 is working and firefighter 1 is not
+            // Compare that against the qualified array to see if the have the qualification and they are working
+            model.sum(ArrayUtils.getColumn(firefighterShiftGrid,j),"*", qualfiedFirefighter[]).post();
+
+
+
+
 
 
         }
-//        Solver solver = model.getSolver();
-//        while (solver.solve()) {
-//            System.out.println(solver.getSolutionCount());
-//        } // while loop
-//        solver.printStatistics();
+        for( int f = 0; f < numFirefighter; f++){
+            model.sum(firefighterShiftGrid[f],">=", shiftMinimum[f]).post();
+
+
+
+        }
+
+        Solver solver = model.getSolver();
+        while (solver.solve()) {
+
+
+            System.out.println(solver.getSolutionCount());
+//            System.out.println(Arrays.deepToString(firefighterShiftGrid));
+        } // while loop
+        solver.printStatistics();
 
 
 
