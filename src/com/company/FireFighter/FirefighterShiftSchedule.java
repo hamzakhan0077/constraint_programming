@@ -41,21 +41,35 @@ public class FirefighterShiftSchedule {
 //                "Qualifications Required  : "+ Arrays.deepToString(qualsRequired)+"\n"+
 //                "Qualified Firefighter   : "+ Arrays.deepToString(qualfiedFirefighter)+"\n"
 //                );
+        System.out.println(minWork);
 
 
         IntVar[][] firefighterShiftGrid = model.intVarMatrix("Grid",  numShifts,  numFirefighter,  0,maxConsecutive );
+        // Row - Firefighter
+        // Col - Shifts
 
 
+        // For each row
         for( int j = 0; j < numShifts; j++){
+
 
             // Sum of each column of the Grid Must be equal to the minimum number in the min Firefighters required
             model.sum(ArrayUtils.getColumn(firefighterShiftGrid,j),">=", shiftMinimum[j]).post();
 
-
-
+        }
+        // we want to run this for each row - i.e. For each firefighter
+        for( int j = 0; j < numShifts; j++){
+        // minimum number of times that firefighter must work
+        // is  Sum or rows (Firefightrs total shift)  >=  minimum shift
+        model.sum(firefighterShiftGrid[],">=", minWork).post();
 
 
         }
+//        Solver solver = model.getSolver();
+//        while (solver.solve()) {
+//            System.out.println(solver.getSolutionCount());
+//        } // while loop
+//        solver.printStatistics();
 
 
 
