@@ -1,4 +1,4 @@
-package com.company;
+package com.company.Vaccine;
 
 
 import org.chocosolver.solver.ISolver;
@@ -16,7 +16,7 @@ public class  VaccineDistribution {
     public static void main(String[] args) throws IOException {
 //        String file ="vaccinations1.txt";
         Model model = new Model("Practice Problem");
-        VaccinationData reader = new VaccinationData("src/com/company/vaccinations1.txt");
+        VaccinationData reader = new VaccinationData("src/com/company/Vaccine/vaccinations1.txt");
 
 
         int numCenters = reader.getNumCentres();
@@ -39,9 +39,15 @@ public class  VaccineDistribution {
 
 
         IntVar[][] vccDistMatrix = model.intVarMatrix("Grid",  numCenters,  numDays,  0,totalVacs );
+
+
+
         // this is to handle the case where the distributed vaccines dosent exceed the
         // total number of the available vaccines days Eg if 20 on D1 cant give more than 20
         for( int j = 0; j < numDays; j++){
+
+
+
             model.sum(ArrayUtils.getColumn(vccDistMatrix,j),"=", sumOfCol[j]).post();
 
             model.sum(ArrayUtils.getColumn(vccDistMatrix,j),"<=", supplies[j]).post();

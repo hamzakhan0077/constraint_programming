@@ -1,4 +1,4 @@
-package com.company;
+package com.company.Vaccine;
 
 import java.io.File;
 import java.io.IOException;

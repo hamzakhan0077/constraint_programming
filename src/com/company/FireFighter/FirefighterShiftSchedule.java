@@ -1,7 +1,6 @@
 package com.company.FireFighter;
-import org.chocosolver.solver.ISolver;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -30,7 +29,8 @@ public class FirefighterShiftSchedule {
         int[][] qualfiedFirefighter = reader.getQualifiedFirefighters(); //returns a 2d matrix (num quals x num fighters), where matrix[i][j] means qualification i is held by firefighter j
         System.out.println("\n"+ "Minimum number of firefighters required  : "+ Arrays.toString(shiftMinimum)+"\n"+
                 "Qualifications Required  : "+ Arrays.deepToString(qualsRequired)+"\n"+
-                "Qualified Firefighter   : "+ Arrays.deepToString(qualfiedFirefighter)+"\n");
+                "Qualified Firefighter   : "+ Arrays.deepToString(qualfiedFirefighter)+"\n"+
+                "Types of Qualifications : " + numQualification +"\n");
 //
 //        System.out.println("Total Number of Shifts : "+ numShifts + "\n" +
 //                "Total Number of Firefighters "+ numFirefighter + "\n" +
@@ -46,19 +46,40 @@ public class FirefighterShiftSchedule {
         System.out.println(minWork);
 
         IntVar[][] firefighterShiftGrid = model.intVarMatrix("Grid",  numShifts,  numFirefighter,  0,1 );
+
         // rows Firefighters
         // Cols Shifts
         IntVar [] qualfiedWorkingff = model.intVarArray(numFirefighter,0,1); //
-        for( int j = 0; j < numShifts; j++){
-
-
+        for( int j = 0; j == numShifts; j++){
             // Sum of each column of the Grid Must be equal to the minimum number in the min Firefighters required
-            model.sum(ArrayUtils.getColumn(firefighterShiftGrid,j),">=", shiftMinimum[j]).post();
+//
+//            System.out.println("-----------------------------------------------");
+//            System.out.println(Arrays.toString(ArrayUtils.getColumn(firefighterShiftGrid, j)));
+//            System.out.println("-----------------------------------------------");
 
-            // Qualified firefighters array [F0, F1]
-            // Shit N - [1, 0] // firefighter 0 is working and firefighter 1 is not
-            // Compare that against the qualified array to see if the have the qualification and they are working
-            model.sum(ArrayUtils.getColumn(firefighterShiftGrid,j),"*", qualfiedFirefighter[]).post();
+
+            model.sum(ArrayUtils.getColumn(firefighterShiftGrid, j), ">=", shiftMinimum[j]).post();
+
+            for (int f = 0;  f < numFirefighter; f++) {
+                model.sum(firefighterShiftGrid[f],">=", shiftMinimum[f]).post();
+
+                for (int numq = 0; numq == numQualification; numq++) {
+                    // Assuming getNumQualification are the qualifications available
+                    // i.e q0 q1 q2 ---- see the array of Qualified FF - Q0 [ firefighter with   qualification 0]
+                    // only one array --> There is only one Qualification Q0
+
+
+                    // Qualified firefighters array [F0, F1]
+                    // Shit N - [1, 0] // firefighter 0 is working and firefighter 1 is not
+                    // Compare that against the qualified array to see if the have the qualification and they are working
+                    model.arithm(qualfiedWorkingff[f],"=",firefighterShiftGrid[numShifts][f] , "*", qualfiedFirefighter[numq][f]).post();
+
+                    model.sum(qualfiedWorkingff,">=",qualsRequired[numq][j]).post();
+
+
+
+                }
+            }
 
 
 
@@ -66,20 +87,32 @@ public class FirefighterShiftSchedule {
 
 
         }
-        for( int f = 0; f < numFirefighter; f++){
-            model.sum(firefighterShiftGrid[f],">=", shiftMinimum[f]).post();
+//        for( int f = 0; f < numFirefighter; f++){
+//            model.sum(firefighterShiftGrid[f],">=", shiftMinimum[f]).post();
+//
+//
+//
+//        }
 
-
-
-        }
 
         Solver solver = model.getSolver();
+
+        // total cost ?? --
+        IntVar[] searchable = ArrayUtils.flatten(firefighterShiftGrid);
+        solver.setSearch(Search.domOverWDegSearch(searchable));
+
+        Solution solution = new Solution(model);
         while (solver.solve()) {
 
+            solution.record();
 
-            System.out.println(solver.getSolutionCount());
+
+//            System.out.println(solver.getSolutionCount());
 //            System.out.println(Arrays.deepToString(firefighterShiftGrid));
         } // while loop
+
+
+
         solver.printStatistics();
 
 
