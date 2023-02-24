@@ -1,5 +1,6 @@
 package com.company.FireFighter;
 import org.chocosolver.solver.*;
+import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -27,6 +28,15 @@ public class FirefighterShiftSchedule {
         int[] shiftMinimum = reader.getShiftMinimum(); //returns an array with the minimum number of firefighters required for each shift
         int[][] qualsRequired = reader.getQualsRequired();//returns a 2d matrix (num quals x num shifts), where at least matrix[i][j] firefighters with qualification i must be scheduled in shift j
         int[][] qualfiedFirefighter = reader.getQualifiedFirefighters(); //returns a 2d matrix (num quals x num fighters), where matrix[i][j] means qualification i is held by firefighter j
+
+        String ones = "1";
+        String zero = "0";
+        String consecOnes = new String(new char[maxConsecutive]).replace("\0", ones) ;
+        String consecZeros = new String(new char[minBreak]).replace("\0", zero) ;
+
+        String regexStr = String.format("%s*1|%s*0",consecZeros,consecOnes);
+        FiniteAutomaton regexp = new FiniteAutomaton(regexStr);
+
         System.out.println("\n"+ "Minimum number of firefighters required  : "+ Arrays.toString(shiftMinimum)+"\n"+
                 "Qualifications Required  : "+ Arrays.deepToString(qualsRequired)+"\n"+
                 "Qualified Firefighter   : "+ Arrays.deepToString(qualfiedFirefighter)+"\n"+
@@ -62,6 +72,8 @@ public class FirefighterShiftSchedule {
 
             for (int f = 0;  f < numFirefighter; f++) {
                 model.sum(firefighterShiftGrid[f],">=", shiftMinimum[f]).post();
+                model.regular(firefighterShiftGrid[j],regexp ).post();
+
 
                 for (int numq = 0; numq == numQualification; numq++) {
                     // Assuming getNumQualification are the qualifications available
